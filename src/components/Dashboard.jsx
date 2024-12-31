@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import WeatherTable from "./WeatherTable";
 import { fetchWeatherData } from "../utils/api";
-import SearchBar from "./searchBar";
+import SearchBar from "./SearchBar";
 
 const Dashboard = () => {
   const [weatherData, setWeatherData] = useState(null);
