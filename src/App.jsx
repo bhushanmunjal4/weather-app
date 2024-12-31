@@ -55,7 +55,7 @@ const App = () => {
         </Box>
         <Box
           sx={{
-            width: isLargeScreen ? "15%" : "100%",
+            width: isLargeScreen ? "18%" : "100%",
             backgroundColor: "#fff",
             padding: 2,
             borderTop: isLargeScreen ? "none" : "1px solid #ddd",
