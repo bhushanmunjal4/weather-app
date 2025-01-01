@@ -7,21 +7,64 @@ import {
   Button,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useEffect, useState } from "react";
+import { fetchWeatherData } from "../utils/api";
+import convertTemperature from "../utils/convertTemperature";
 
 const Favorites = () => {
-  const favoriteCities = JSON.parse(localStorage.getItem("favorites")) || [];
+  const [weatherData, setWeatherData] = useState([]);
+
+  useEffect(() => {
+    const getWeatherForFavorites = async () => {
+      const favoriteCities =
+        JSON.parse(localStorage.getItem("favorites")) || [];
+      const updatedWeatherData = [];
+
+      for (const cityData of favoriteCities) {
+        try {
+          const data = await fetchWeatherData(cityData.city, cityData.unit);
+          const convertedTemp = convertTemperature(
+            data.main.temp,
+            cityData.unit
+          );
+
+          updatedWeatherData.push({
+            city: cityData.city,
+            temperature: convertedTemp,
+            description: data.weather[0].description,
+            unit: cityData.unit,
+          });
+        } catch (error) {
+          console.error(
+            "Error fetching weather data for city:",
+            cityData.city,
+            error
+          );
+        }
+      }
+
+      setWeatherData(updatedWeatherData);
+    };
+
+    getWeatherForFavorites();
+  }, []); // Run only on component mount
 
   const removeCity = (cityToRemove) => {
+    const favoriteCities = JSON.parse(localStorage.getItem("favorites")) || [];
     const updatedCities = favoriteCities.filter(
       (city) => city.city !== cityToRemove
     );
     localStorage.setItem("favorites", JSON.stringify(updatedCities));
-    window.location.reload();
+
+    // Update weatherData state instead of reloading the page
+    setWeatherData((prevData) =>
+      prevData.filter((city) => city.city !== cityToRemove)
+    );
   };
 
   const clearAllCities = () => {
     localStorage.removeItem("favorites");
-    window.location.reload();
+    setWeatherData([]); // Clear weatherData instead of reloading the page
   };
 
   return (
@@ -55,19 +98,17 @@ const Favorites = () => {
         </Button>
       </Box>
 
-      {favoriteCities.length > 0 ? (
+      {weatherData.length > 0 ? (
         <List sx={{ paddingLeft: 2 }}>
-          {favoriteCities.map((cityData, index) => {
+          {weatherData.map((cityData) => {
             const temperature =
               cityData.temperature && !isNaN(cityData.temperature)
                 ? cityData.temperature.toFixed(1)
                 : null;
 
-            const description = cityData.description || null;
-
             return (
               <ListItem
-                key={index}
+                key={cityData.city}
                 sx={{
                   paddingLeft: 0,
                   display: "flex",
@@ -98,16 +139,14 @@ const Favorites = () => {
 
                     {temperature && (
                       <Typography variant="body2">
-                        Temperature: {temperature}°{" "}
+                        Temperature: {temperature}°
                         {cityData.unit === "metric" ? "C" : "F"}
                       </Typography>
                     )}
 
-                    {description && (
-                      <Typography variant="body2">
-                        Description: {description}
-                      </Typography>
-                    )}
+                    <Typography variant="body2">
+                      Description: {cityData.description}
+                    </Typography>
                   </Box>
 
                   <IconButton

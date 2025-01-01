@@ -8,21 +8,14 @@ import {
 } from "@mui/material";
 import PropTypes from "prop-types";
 
-const SearchBar = ({ onSearch, onAddFavorite, error }) => {
+const SearchBar = ({ onSearch, error }) => {
   const [city, setCity] = useState("");
   const isLargeScreen = useMediaQuery("(min-width:1500px)");
 
-  const handleSearch = async () => {
+  const handleSubmit = () => {
     if (!city.trim()) return;
-
-    try {
-      const weatherData = await onSearch(city.trim());
-      if (weatherData) {
-        onAddFavorite(weatherData);
-      }
-    } catch (err) {
-      console.error(err); // Log the error for debugging purposes
-    }
+    onSearch(city.trim());
+    setCity("");
   };
 
   return (
@@ -57,7 +50,7 @@ const SearchBar = ({ onSearch, onAddFavorite, error }) => {
               color: "#fff",
             },
           }}
-          onClick={handleSearch}
+          onClick={handleSubmit}
         >
           Search
         </Button>
@@ -69,7 +62,6 @@ const SearchBar = ({ onSearch, onAddFavorite, error }) => {
 
 SearchBar.propTypes = {
   onSearch: PropTypes.func.isRequired,
-  onAddFavorite: PropTypes.func.isRequired,
   error: PropTypes.string,
 };
 

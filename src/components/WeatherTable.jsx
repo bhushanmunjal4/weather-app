@@ -13,7 +13,7 @@ import {
 import PropTypes from "prop-types";
 import { Cookies } from "react-cookie";
 
-const WeatherTable = ({ weatherData, onAddFavorite }) => {
+const WeatherTable = ({ weatherData }) => {
   const [unit, setUnit] = useState("metric");
   const [temperature, setTemperature] = useState(null);
 
@@ -44,21 +44,24 @@ const WeatherTable = ({ weatherData, onAddFavorite }) => {
     }
   }, [unit, weatherData]);
 
+  console.log("Weather Data:", weatherData);
+
   const { name, weather } = weatherData;
 
-  const handleAddToFavorites = () => {
-    const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-    const cityData = {
-      city: name,
-      temperature: temperature,
-      unit: unit,
-      description: weather[0].description,
-    };
+  const addCityToFavorites = (city, unit) => {
+    const currentFavorites =
+      JSON.parse(localStorage.getItem("favorites")) || [];
+    const cityExists = currentFavorites.some((fav) => fav.city === city);
 
-    if (!favorites.find((favorite) => favorite.city === name)) {
-      favorites.push(cityData);
-      localStorage.setItem("favorites", JSON.stringify(favorites));
-      onAddFavorite(name);
+    if (!cityExists) {
+      currentFavorites.push({
+        city,
+        unit,
+      });
+
+      localStorage.setItem("favorites", JSON.stringify(currentFavorites));
+    } else {
+      console.log(`${city} is already in your favorites.`);
     }
   };
 
@@ -143,7 +146,7 @@ const WeatherTable = ({ weatherData, onAddFavorite }) => {
                 <Button
                   variant="contained"
                   color="success"
-                  onClick={handleAddToFavorites}
+                  onClick={() => addCityToFavorites(name, unit)}
                   sx={{
                     padding: "8px 24px",
                     borderRadius: "20px",
@@ -178,7 +181,6 @@ WeatherTable.propTypes = {
       })
     ).isRequired,
   }),
-  onAddFavorite: PropTypes.func.isRequired,
 };
 
 export default WeatherTable;
